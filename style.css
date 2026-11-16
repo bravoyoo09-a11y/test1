@@ -1,0 +1,392 @@
+/* ───────── 색과 글꼴 ───────── */
+:root {
+  --sky: #E9E6F2;          /* 첫 화면 배경 */
+  --on-sky: #23285C;       /* 첫 화면 글자 */
+  --hill-far: #C8C4E8;
+  --hill-near: #2E3577;
+  --ground: #23285C;       /* 아래 본문 배경 */
+  --on-ground: #E9E6F2;    /* 아래 본문 글자 */
+  --muted: #A9ADD6;
+  --line: rgba(233, 230, 242, .18);
+
+  --cobalt: #3047D1;
+  --sun: #E8B53C;
+  --pink: #F08AA6;
+  --mint: #6CC9B0;
+
+  --serif: "Gowun Batang", "Nanum Myeongjo", "AppleMyungjo", serif;
+  --sans: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sky: #15172F;
+    --on-sky: #E9E6F2;
+    --hill-far: #23264D;
+    --hill-near: #1A1D3E;
+    --ground: #10122A;
+    --on-ground: #E9E6F2;
+    --muted: #8E92BE;
+    --line: rgba(233, 230, 242, .14);
+    --cobalt: #5A6EF0;
+    color-scheme: dark;
+  }
+}
+
+/* ───────── 기본 ───────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 4.5rem;
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--on-ground);
+  font-family: var(--sans);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  word-break: keep-all;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--sun);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+.skip {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 50;
+  padding: .5rem 1rem;
+  background: var(--sun);
+  color: #23285C;
+}
+.skip:focus { top: 1rem; }
+
+/* ───────── 상단 바 ───────── */
+.top {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 20;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: calc(1.1rem + env(safe-area-inset-top, 0px)) clamp(1.25rem, 4vw, 3rem) 1.1rem;
+  color: var(--on-sky);
+  mix-blend-mode: normal;
+  transition: background .3s, color .3s;
+}
+.top.is-scrolled {
+  background: var(--ground);
+  color: var(--on-ground);
+}
+.top a { text-decoration: none; }
+.top-name {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+.top nav { display: flex; gap: clamp(1rem, 3vw, 2rem); font-size: .95rem; }
+.top nav a { padding-block: .25rem; border-bottom: 1px solid transparent; }
+.top nav a:hover { border-bottom-color: currentColor; }
+
+/* ───────── 첫 화면 장면 ───────── */
+.scene {
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  background: var(--sky);
+  color: var(--on-sky);
+  isolation: isolate;
+}
+
+/* 달 대신: 위는 노랑, 아래는 코발트로 갈린 원 */
+.orb {
+  position: absolute;
+  top: 14%;
+  right: 12%;
+  width: clamp(110px, 22vmin, 220px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: linear-gradient(to bottom, var(--sun) 50%, var(--cobalt) 50%);
+  z-index: -2;
+}
+
+.hills {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 44%;
+  z-index: -1;
+}
+.hills .far { fill: var(--hill-far); }
+.hills .near { fill: var(--hill-near); }
+
+/* 도형 들판 */
+.field {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 46%;
+  pointer-events: none;
+}
+
+.sprout {
+  position: absolute;
+  bottom: var(--y);
+  left: var(--x);
+  width: 0;
+  height: var(--h);
+  z-index: var(--z);
+  rotate: var(--tilt);
+  transform-origin: bottom center;
+  animation: sway var(--sway) ease-in-out var(--delay) infinite alternate;
+}
+.sprout .stem {
+  position: absolute;
+  left: -1px;
+  bottom: 0;
+  width: 2px;
+  height: 100%;
+  background: var(--stem, var(--muted));
+  transform-origin: bottom;
+  animation: grow .9s cubic-bezier(.2, .8, .2, 1) var(--delay) both;
+}
+.sprout .head {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--s);
+  height: var(--s);
+  translate: -50% -50%;
+  color: var(--c);
+  overflow: visible;
+  animation: pop .6s cubic-bezier(.3, 1.6, .5, 1) calc(var(--delay) + .55s) both;
+}
+.sprout .head * { fill: currentColor; }
+.sprout .head .ring { fill: none; stroke: currentColor; stroke-width: 4; }
+
+@keyframes grow { from { scale: 1 0; } to { scale: 1 1; } }
+@keyframes pop  { from { scale: 0; } to { scale: 1; } }
+@keyframes sway { to { rotate: calc(var(--tilt) + var(--swing)); } }
+
+/* 떠다니는 점 */
+.motes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.mote {
+  position: absolute;
+  left: var(--x);
+  bottom: var(--y);
+  width: var(--r);
+  height: var(--r);
+  border-radius: 50%;
+  background: var(--c);
+  opacity: 0;
+  animation: drift var(--d) linear var(--delay) infinite;
+}
+@keyframes drift {
+  0%   { opacity: 0; translate: 0 0; }
+  15%  { opacity: .85; }
+  85%  { opacity: .6; }
+  100% { opacity: 0; translate: var(--dx) -42vh; }
+}
+
+/* 중앙 글 (참고 펜의 verse 자리) */
+.intro {
+  position: relative;
+  z-index: 10;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6rem clamp(1.25rem, 8vw, 7rem) 46vh;
+  max-width: 64rem;
+}
+.intro-name {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(3.5rem, 13vw, 9.5rem);
+  line-height: 1;
+  letter-spacing: -.02em;
+}
+.intro-line {
+  margin: 1.5rem 0 .5rem;
+  font-family: var(--serif);
+  font-size: clamp(1.2rem, 2.4vw, 1.6rem);
+  line-height: 1.6;
+}
+.intro-caption {
+  margin: 0;
+  font-size: .95rem;
+  opacity: .75;
+}
+.intro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-top: 2rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.9rem;
+  padding: 0 1.4rem;
+  border: 2px solid var(--on-sky);
+  border-radius: 999px;
+  font: 500 .95rem/1 var(--sans);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .2s, color .2s;
+}
+.btn-solid { background: var(--on-sky); color: var(--sky); }
+.btn-solid:hover { background: var(--cobalt); border-color: var(--cobalt); color: #fff; }
+.btn-ghost { background: transparent; color: var(--on-sky); }
+.btn-ghost:hover { background: var(--on-sky); color: var(--sky); }
+
+/* ───────── 아래 본문 ───────── */
+.ground {
+  background: var(--ground);
+  color: var(--on-ground);
+}
+
+.block {
+  display: grid;
+  grid-template-columns: minmax(8rem, 14rem) minmax(0, 1fr);
+  gap: 2rem clamp(1.5rem, 5vw, 4rem);
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: clamp(4rem, 10vw, 7.5rem) clamp(1.25rem, 6vw, 4rem);
+  border-top: 1px solid var(--line);
+}
+.block:first-child { border-top: 0; }
+
+.block-title {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(1.75rem, 3.4vw, 2.4rem);
+  line-height: 1.2;
+}
+
+/* 작업물 목록 */
+.projects {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.project {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) auto;
+  gap: 1.5rem;
+  padding: 2rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.project:first-child { padding-top: 0; }
+.project:last-child { border-bottom: 0; }
+
+.glyph svg { width: 2.4rem; height: 2.4rem; display: block; overflow: visible; }
+
+.project h3 {
+  margin: 0 0 .4rem;
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  line-height: 1.35;
+}
+.project h3 a {
+  text-decoration: none;
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+  transition: background-size .3s;
+}
+.project h3 a:hover { background-size: 100% 1px; }
+.project-body p { margin: 0; max-width: 38rem; color: var(--muted); }
+.project-meta {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-size: .875rem;
+  line-height: 1.6;
+  text-align: right;
+  color: var(--muted);
+}
+
+/* 소개 */
+.about { max-width: 40rem; }
+.about p { margin: 0 0 1.25rem; }
+.about-lead {
+  font-family: var(--serif);
+  font-size: clamp(1.3rem, 2.4vw, 1.65rem);
+  line-height: 1.6;
+}
+.tools {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: .5rem 1.5rem;
+  margin: 2rem 0 0;
+  font-size: .95rem;
+}
+.tools dt { color: var(--muted); }
+.tools dd { margin: 0; }
+
+/* 연락 */
+.contact p { margin: 0 0 .75rem; color: var(--muted); }
+.contact-mail {
+  display: inline-block;
+  font-family: var(--serif);
+  font-size: clamp(1.6rem, 5vw, 3rem);
+  line-height: 1.25;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  border-bottom: 2px solid var(--sun);
+}
+.contact-mail:hover { color: var(--sun); }
+.contact-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  list-style: none;
+  margin: 2rem 0 0;
+  padding: 0;
+}
+.contact-links a { text-underline-offset: .25em; }
+
+.foot {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 2rem clamp(1.25rem, 6vw, 4rem) calc(2rem + env(safe-area-inset-bottom, 0px));
+  font-size: .85rem;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+}
+.foot p { margin: 0; }
+
+/* ───────── 모바일 ───────── */
+@media (max-width: 720px) {
+  .block { grid-template-columns: 1fr; }
+  .project { grid-template-columns: 2.25rem minmax(0, 1fr); gap: 1rem; }
+  .glyph svg { width: 1.9rem; height: 1.9rem; }
+  .project-meta { grid-column: 2; text-align: left; display: flex; gap: 1rem; }
+  .orb { top: 12%; right: 8%; width: 76px; }
+  .intro { padding-bottom: 40vh; }
+}
+
+/* 움직임 줄이기 설정 존중 */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .sprout, .sprout .stem, .sprout .head { animation: none; }
+  .mote { display: none; }
+}
