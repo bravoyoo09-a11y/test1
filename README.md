@@ -11,3 +11,5 @@
 AI를 활용하는 시니어 AI 강사가 되겠습니다.
 
 GitHub Pages 배포 확인 실습
+
+README.md 파일 수정 연습
